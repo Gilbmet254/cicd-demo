@@ -30,8 +30,10 @@ def health_check():
 
 @app.get("/items", response_model=list[ItemOut])
 def list_items():
-    return [ItemOut(id=item_id, **item.model_dump()) for item_id, item in _items.items()]
-
+    return [
+        ItemOut(id=item_id, **item.model_dump())
+        for item_id, item in _items.items()
+    ]
 
 @app.post("/items", response_model=ItemOut, status_code=201)
 def create_item(item: Item):
