@@ -1,14 +1,11 @@
 name: CI/CD Pipeline
-
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-
 permissions:
   contents: read
-
 jobs:
   test:
     name: Run tests
@@ -16,28 +13,22 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: "pip"
-
       - name: Install dependencies
         run: pip install -r requirements-dev.txt
-
       - name: Lint with ruff
         run: ruff check app tests
-
       - name: Run tests with coverage
         run: pytest --cov=app --cov-report=term-missing --cov-report=xml
-
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coverage.xml
-
   security:
     name: Security scans
     runs-on: ubuntu-latest
@@ -45,22 +36,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: "pip"
-
       - name: Install dependencies
         run: pip install -r requirements-dev.txt
-
       - name: Run Bandit (static security analysis)
         run: bandit -r app -f screen
-
       - name: Run pip-audit (dependency vulnerability scan)
         run: pip-audit -r requirements.txt
-
       - name: Scan Docker image for vulnerabilities (Trivy)
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -68,7 +54,6 @@ jobs:
           scan-ref: "."
           severity: "CRITICAL,HIGH"
           exit-code: "1"
-
   build:
     name: Build Docker image
     runs-on: ubuntu-latest
@@ -77,10 +62,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
       - name: Build image
         uses: docker/build-push-action@v6
         with:
@@ -89,7 +72,6 @@ jobs:
           tags: cicd-demo:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
   deploy:
     name: Deploy to Render
     runs-on: ubuntu-latest
@@ -98,8 +80,7 @@ jobs:
     steps:
       - name: Trigger Render deploy
         run: |
-          curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
-
+          curl -f -X GET "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
       - name: Wait and verify health check
         run: |
           echo "Waiting for deploy to settle..."
